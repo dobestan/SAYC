@@ -17,6 +17,7 @@ contract Soulbound is ERC1155, Ownable {
     uint public constant SM_M = 6;
 
     event Soulbounded(uint256 indexed id, bool bounded);
+    event Register(address indexed soul);
 
     mapping(uint => bool) private _soulbounds;
 
@@ -28,6 +29,18 @@ contract Soulbound is ERC1155, Ownable {
         _setSoulbound(DS_S, true);
         _setSoulbound(SM_S, true);
         _setSoulbound(SM_M, true);
+    }
+
+    function register(address soul, uint[6] calldata bdsm_scores) external onlyOwner soulNotRegistered(soul) {
+        _mint(soul, MALICIOUS, 1, "");
+        _mint(soul, BD_B, bdsm_scores[0], "");
+        _mint(soul, BD_D, bdsm_scores[1], "");
+        _mint(soul, DS_D, bdsm_scores[2], "");
+        _mint(soul, DS_S, bdsm_scores[3], "");
+        _mint(soul, SM_S, bdsm_scores[4], "");
+        _mint(soul, SM_M, bdsm_scores[5], "");
+
+        emit Register(soul);
     }
 
     function isSoulbound(uint256 id) public view returns (bool) {
@@ -57,5 +70,25 @@ contract Soulbound is ERC1155, Ownable {
                 // SBT only allows transfer via _mint, _burn.
             }
         }
+    }
+
+    function isRegistered(address soul) public view returns (bool) {
+        return balanceOf(soul, BD_B) > 0;
+    }
+
+    modifier soulRegistered(address soul) {
+        require(
+            isRegistered(soul),
+            "Soulbound: Soul should be register first."
+        );
+        _;
+    }
+
+    modifier soulNotRegistered(address soul) {
+        require(
+            !isRegistered(soul),
+            "Soulbound: Soul is already registered."
+        );
+        _;
     }
 }
