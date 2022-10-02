@@ -43,6 +43,18 @@ contract Soulbound is ERC1155, Ownable {
         emit Register(soul);
     }
 
+    function getScores(address soul) public view returns (uint, uint, uint, uint, uint, uint) {
+        return (
+            balanceOf(soul, BD_B),
+            balanceOf(soul, BD_D),
+            balanceOf(soul, DS_D),
+            balanceOf(soul, DS_S),
+            balanceOf(soul, SM_S),
+            balanceOf(soul, SM_M)
+        );
+    }
+
+
     function isSoulbound(uint256 id) public view returns (bool) {
         return _soulbounds[id];
     }
