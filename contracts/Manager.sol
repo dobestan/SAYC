@@ -11,6 +11,15 @@ contract Manager is Ownable {
 
     event MatchRequest(address soul);
     event MatchResponse(address soul, address[] souls);
+    event Matched(address soul0, address soul1);
+
+    struct Match {
+        address soul0;
+        address soul1;
+        // TODO: escrow functionality(ex, isOkay?)
+    }
+
+    Match[] public matches;
 
     constructor() {
         soulbound = address(new Soulbound());
@@ -29,7 +38,18 @@ contract Manager is Ownable {
         emit MatchResponse(soul, souls);
     }
 
-    function _createMatch(address account1, address account2) public {
-        // TODO
+    function _createMatch(address soulA, address soulB) public {
+        (address soul0, address soul1) = _asOrderedAddresses(soulA, soulB);
+        Match memory createdMatch = Match(soul0, soul1);
+        matches.push(createdMatch);
+
+        emit Matched(soul0, soul1);
+        emit Matched(soul1, soul0);
+    }
+
+    function _asOrderedAddresses(address accountA, address accountB) public pure returns (address account0, address account1) {
+        // account0/account1 is Ordered
+        // accountA/accountB is Unordered
+        return accountA < accountB ? (accountA, accountB) : (accountB, accountA);
     }
 }
