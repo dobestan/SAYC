@@ -7,7 +7,7 @@ const app = express()
 const port = 3000
 
 
-app.get('/', async (req, res) => {
+app.get('/api/souls/', async (req, res) => {
     const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
     const signer = provider.getSigner();
 
@@ -38,8 +38,59 @@ app.get('/', async (req, res) => {
     const registerEvents = await soulboundContract.queryFilter(filterRegister);
     const souls = registerEvents.map(event => event.args.soul);
 
-    res.send(souls);
-})
+    res.json(souls);
+});
+
+
+app.get('/api/matches/', async (req, res) => {
+    const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
+    const signer = provider.getSigner();
+
+    const managerAddress = managerDeployments.address;
+    const managerAbi = managerDeployments.abi;
+
+    const managerContract = new ethers.Contract(
+        managerAddress,
+        managerAbi,
+        provider,
+    );
+
+    const filterMatched = managerContract.filters.Matched(null);
+    const matchedEvents = await managerContract.queryFilter(filterMatched);
+    const result = {
+        count: matchedEvents.length,
+        data: matchedEvents,
+    }
+
+    res.json(result);
+});
+
+
+app.get('/api/souls/:soul/matches/', async (req, res) => {
+    const soulAddress = req.params.soul;
+
+    const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
+    const signer = provider.getSigner();
+
+    const managerAddress = managerDeployments.address;
+    const managerAbi = managerDeployments.abi;
+
+    const managerContract = new ethers.Contract(
+        managerAddress,
+        managerAbi,
+        provider,
+    );
+
+    const filterMatched = managerContract.filters.Matched(soulAddress);
+    const matchedEvents = await managerContract.queryFilter(filterMatched);
+    const result = {
+        count: matchedEvents.length,
+        data: matchedEvents,
+    }
+
+    res.json(result);
+});
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);

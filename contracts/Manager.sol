@@ -9,9 +9,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Manager is Ownable {
     address public soulbound;
 
-    event MatchRequest(address soul);
-    event MatchResponse(address soul, address[] souls);
-    event Matched(address soul0, address soul1);
+    event MatchRequest(address indexed soul);
+    event MatchResponse(address indexed soul, address[] souls);
+    event Matched(address indexed soul0, address indexed soul1);
 
     struct Match {
         address soul0;
